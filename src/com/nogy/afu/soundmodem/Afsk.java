@@ -128,8 +128,10 @@ public class Afsk implements AudioRecord.OnRecordPositionUpdateListener
 	public void sendMessage(Message m)
 	{
 		// stop playback if not finished with last one
-		if (isPlaying)
+		if (isPlaying) {
+			android.util.Log.e("Afsk", "Skipping packet; last one is still playing.");
 			return;
+		}
 
 		int i,k=0;
 		int t=0;
