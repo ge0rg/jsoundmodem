@@ -128,8 +128,10 @@ public class Afsk implements AudioRecord.OnRecordPositionUpdateListener
 	public void sendMessage(Message m)
 	{
 		// stop playback if not finished with last one
-		if (isPlaying)
+		if (isPlaying) {
+			android.util.Log.d("AFSK", "still playing back old sample");
 			return;
+		}
 
 		int i,k=0;
 		int t=0;
@@ -160,6 +162,7 @@ public class Afsk implements AudioRecord.OnRecordPositionUpdateListener
 	
 	public void sendPCM(short[] pcmData)
 	{
+		android.util.Log.d("AFSK", "starting playback");
 		a = new AudioTrack(
 				AudioManager.STREAM_RING,
 				samplerate,
@@ -175,6 +178,7 @@ public class Afsk implements AudioRecord.OnRecordPositionUpdateListener
 		a.setNotificationMarkerPosition(pcmData.length);
 		a.setPlaybackPositionUpdateListener(new AudioTrack.OnPlaybackPositionUpdateListener() {
 			public void onMarkerReached(AudioTrack track) {
+				android.util.Log.d("AFSK", "finished playback");
 				track.release();
 				isPlaying = false;
 			}
