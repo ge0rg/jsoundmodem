@@ -125,6 +125,30 @@ public class Afsk implements AudioRecord.OnRecordPositionUpdateListener
 		this.volume = vol;
 	}
 	
+	public short[] encodeMessagePCM(Message m) {
+		final int SAMPLES = (m.numberOfBits*samplerate)/bps;
+		final int AMPLITUDE = (1 << (pcmBits-1))-1;
+		short[] pcmData = new short[SAMPLES];
+		int bitpos = -1;
+		double cospos=0;
+		int lasttone=f_low;
+		for (int sample = 0; sample < SAMPLES; sample++) {
+			// check if we arrived at the next bit
+			if (bitpos != sample*bps/samplerate) {
+				bitpos = sample*bps/samplerate;
+				// if bit == 0, we need to switch 1200<->2200
+				if ((m.data[bitpos/8] & (1<<bitpos%8)) == 0)
+					lasttone = (lasttone==f_low)?f_high:f_low;
+			}
+			pcmData[sample]=(short) Math.round(Math.cos(cospos)*((1 << (pcmBits-1))-1));
+
+			cospos += 2*Math.PI*lasttone/samplerate;
+			if (cospos > 2*Math.PI)
+				cospos -= 2*Math.PI;
+		}
+		return pcmData;
+	}
+
 	public void sendMessage(Message m)
 	{
 		// stop playback if not finished with last one
@@ -133,31 +157,7 @@ public class Afsk implements AudioRecord.OnRecordPositionUpdateListener
 			return;
 		}
 
-		int i,k=0;
-		int t=0;
-		int datapoint=0;
-		double cospos=0;
-		int lasttone=f_low;
-		short[] pcmData = new short[(m.numberOfBits*samplerate)/bps];
-		for (i=0; i<m.numberOfBits; i++)
-		{
-			
-				t=0;
-				if ((m.data[i/8] & (1<<(i%8)))==0) // bit to transmit is 0
-				{
-					lasttone = (lasttone==f_low)?f_high:f_low;
-				}
-				while(t++<samplerate/bps)
-				{
-					pcmData[datapoint++]=(short) Math.round(Math.cos(cospos)*((1 << (pcmBits-1))-1));
-
-					cospos += 2*Math.PI*lasttone/samplerate;
-					if (cospos > 2*Math.PI)
-						cospos -= 2*Math.PI;					
-				}
-			
-		}
-		sendPCM(pcmData);
+		sendPCM(encodeMessagePCM(m));
 	}
 	
 	public void sendPCM(short[] pcmData)
