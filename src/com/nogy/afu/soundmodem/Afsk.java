@@ -26,12 +26,6 @@ import android.os.Handler;
 
 public class Afsk implements AudioRecord.OnRecordPositionUpdateListener
 {
-	public static int f_low = 1200;
-	public static int f_high = 2200;
-	public static int bps = 1200;
-	public static int samplerate = 22050;
-	public static int pcmBits = 16;
-	
 	public short[] recordData;
 	
 	private AudioTrack a;
@@ -125,30 +119,6 @@ public class Afsk implements AudioRecord.OnRecordPositionUpdateListener
 		this.volume = vol;
 	}
 	
-	public short[] encodeMessagePCM(Message m) {
-		final int SAMPLES = (m.numberOfBits*samplerate)/bps;
-		final int AMPLITUDE = (1 << (pcmBits-1))-1;
-		short[] pcmData = new short[SAMPLES];
-		int bitpos = -1;
-		double cospos=0;
-		int lasttone=f_low;
-		for (int sample = 0; sample < SAMPLES; sample++) {
-			// check if we arrived at the next bit
-			if (bitpos != sample*bps/samplerate) {
-				bitpos = sample*bps/samplerate;
-				// if bit == 0, we need to switch 1200<->2200
-				if ((m.data[bitpos/8] & (1<<bitpos%8)) == 0)
-					lasttone = (lasttone==f_low)?f_high:f_low;
-			}
-			pcmData[sample]=(short) Math.round(Math.cos(cospos)*((1 << (pcmBits-1))-1));
-
-			cospos += 2*Math.PI*lasttone/samplerate;
-			if (cospos > 2*Math.PI)
-				cospos -= 2*Math.PI;
-		}
-		return pcmData;
-	}
-
 	public void sendMessage(Message m)
 	{
 		// stop playback if not finished with last one
@@ -157,14 +127,14 @@ public class Afsk implements AudioRecord.OnRecordPositionUpdateListener
 			return;
 		}
 
-		sendPCM(encodeMessagePCM(m));
+		sendPCM(AfskEncoder.encodeMessagePCM(m));
 	}
 	
 	public void sendPCM(short[] pcmData)
 	{
 		a = new AudioTrack(
 				AudioManager.STREAM_RING,
-				samplerate,
+				AfskEncoder.samplerate,
 				AudioFormat.CHANNEL_CONFIGURATION_MONO,
 				AudioFormat.ENCODING_PCM_16BIT,
 				pcmData.length*2,
@@ -206,14 +176,14 @@ public class Afsk implements AudioRecord.OnRecordPositionUpdateListener
 			//android.Manifest.permission.RECORD_AUDIO;
 			int encoding = AudioFormat.ENCODING_PCM_16BIT;
 			int format = AudioFormat.CHANNEL_CONFIGURATION_MONO;
-			int bs = (AudioRecord.getMinBufferSize(samplerate, format, encoding));
+			int bs = (AudioRecord.getMinBufferSize(AfskEncoder.samplerate, format, encoding));
 			
 			recordData = new short[bs];
 			
 			//android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 			ar = new AudioRecord(
 						MediaRecorder.AudioSource.MIC,
-						samplerate,
+						AfskEncoder.samplerate,
 						format,
 						encoding,
 						bs);
