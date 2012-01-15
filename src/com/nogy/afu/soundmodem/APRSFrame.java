@@ -126,25 +126,7 @@ public class APRSFrame {
 		}
 		if (mycall.length>1)
 		{
-			switch (Integer.parseInt(mycall[1]))
-			{
-				case 0: out[6] = 0x60; break;
-				case 1: out[6] = 0x62; break;
-				case 2: out[6] = 0x64; break;
-				case 3: out[6] = 0x66; break;
-				case 4: out[6] = 0x68; break;
-				case 5: out[6] = 0x6A; break;
-				case 6: out[6] = 0x6C; break;
-				case 7: out[6] = 0x6E; break;
-				case 8: out[6] = 0x70; break;
-				case 9: out[6] = 0x72; break;
-				case 10: out[6] = 0x74; break;
-				case 11: out[6] = 0x76; break;
-				case 12: out[6] = 0x78; break;
-				case 13: out[6] = 0x7A; break;
-				case 14: out[6] = 0x7C;  break;
-				default: out[6] = 0x60;  break;
-			}
+			out[6] = (byte)(0x60 | (Integer.parseInt(mycall[1])*2) & 0x1e);
 		}
 		else 
 			out[6] = 0x60; // SSID 0 as default;
