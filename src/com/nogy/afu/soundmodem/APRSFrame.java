@@ -137,7 +137,7 @@ public class APRSFrame {
 		return out;
 	}
 	
-	public Message getMessage()
+	public byte[] toAX25()
 	{
 		String[] digis = this.digia.split(",");
 		byte[] databytes = data.getBytes();
@@ -165,7 +165,12 @@ public class APRSFrame {
 		temp = crc16(out);
 		out[i++] = temp[0];
 		out[i] = temp[1];
-		return bitStuffAndFrame(out, this.framelength);
+		return out;
+	}
+
+	public Message getMessage()
+	{
+		return bitStuffAndFrame(toAX25(), this.framelength);
 	}
 	
 	
