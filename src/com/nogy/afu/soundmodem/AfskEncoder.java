@@ -4,7 +4,7 @@ public class AfskEncoder {
 	public static int f_low = 1200;
 	public static int f_high = 2200;
 	public static int bps = 1200;
-	public static int samplerate = 22050;
+	public static int samplerate = 16000;
 	public static int pcmBits = 16;
 	
 
