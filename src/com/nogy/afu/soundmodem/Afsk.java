@@ -28,6 +28,7 @@ public class Afsk implements AudioRecord.OnRecordPositionUpdateListener
 {
 	public short[] recordData;
 	
+	private int streamType;
 	private AudioTrack a;
 	private boolean isPlaying;
 	private	AudioRecord ar;
@@ -46,8 +47,9 @@ public class Afsk implements AudioRecord.OnRecordPositionUpdateListener
 	private Handler uiHandler;
 	private Runnable updateTextView;
 	
-	public Afsk()
+	public Afsk(int streamType)
 	{
+		this.streamType = streamType;
 		run = true;
 		uiHandler = new Handler();
 		debug = null;
@@ -101,6 +103,10 @@ public class Afsk implements AudioRecord.OnRecordPositionUpdateListener
 //		postProcessor.setPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 		postProcessor.setDaemon(true);
 	}
+	public Afsk() {
+		this(AudioManager.STREAM_RING);
+	}
+
 	
 	//
 	public void release()
@@ -133,7 +139,7 @@ public class Afsk implements AudioRecord.OnRecordPositionUpdateListener
 	public void sendPCM(short[] pcmData)
 	{
 		a = new AudioTrack(
-				AudioManager.STREAM_RING,
+				streamType,
 				AfskEncoder.samplerate,
 				AudioFormat.CHANNEL_CONFIGURATION_MONO,
 				AudioFormat.ENCODING_PCM_16BIT,
