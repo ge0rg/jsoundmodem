@@ -4,11 +4,10 @@ public class AfskEncoder {
 	public static int f_low = 1200;
 	public static int f_high = 2200;
 	public static int bps = 1200;
-	public static int samplerate = 16000;
 	public static int pcmBits = 16;
 	
 
-	public static short[] encodeMessagePCM(Message m) {
+	public static short[] encodeMessagePCM(Message m, int samplerate) {
 		final int SAMPLES = (m.numberOfBits*samplerate)/bps;
 		final int AMPLITUDE = (1 << (pcmBits-1))-1;
 		short[] pcmData = new short[SAMPLES];

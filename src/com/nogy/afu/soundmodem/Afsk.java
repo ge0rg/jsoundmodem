@@ -29,6 +29,7 @@ public class Afsk implements AudioRecord.OnRecordPositionUpdateListener
 	public short[] recordData;
 	
 	private int streamType;
+	private int samplerate;
 	private AudioTrack a;
 	private boolean isPlaying;
 	private	AudioRecord ar;
@@ -47,9 +48,10 @@ public class Afsk implements AudioRecord.OnRecordPositionUpdateListener
 	private Handler uiHandler;
 	private Runnable updateTextView;
 	
-	public Afsk(int streamType)
+	public Afsk(int streamType, int samplerate)
 	{
 		this.streamType = streamType;
+		this.samplerate = samplerate;
 		run = true;
 		uiHandler = new Handler();
 		debug = null;
@@ -104,7 +106,7 @@ public class Afsk implements AudioRecord.OnRecordPositionUpdateListener
 		postProcessor.setDaemon(true);
 	}
 	public Afsk() {
-		this(AudioManager.STREAM_RING);
+		this(AudioManager.STREAM_RING, 22050);
 	}
 
 	
@@ -133,14 +135,14 @@ public class Afsk implements AudioRecord.OnRecordPositionUpdateListener
 			return;
 		}
 
-		sendPCM(AfskEncoder.encodeMessagePCM(m));
+		sendPCM(AfskEncoder.encodeMessagePCM(m, samplerate));
 	}
 	
 	public void sendPCM(short[] pcmData)
 	{
 		a = new AudioTrack(
 				streamType,
-				AfskEncoder.samplerate,
+				samplerate,
 				AudioFormat.CHANNEL_CONFIGURATION_MONO,
 				AudioFormat.ENCODING_PCM_16BIT,
 				pcmData.length*2,
@@ -182,14 +184,14 @@ public class Afsk implements AudioRecord.OnRecordPositionUpdateListener
 			//android.Manifest.permission.RECORD_AUDIO;
 			int encoding = AudioFormat.ENCODING_PCM_16BIT;
 			int format = AudioFormat.CHANNEL_CONFIGURATION_MONO;
-			int bs = (AudioRecord.getMinBufferSize(AfskEncoder.samplerate, format, encoding));
+			int bs = (AudioRecord.getMinBufferSize(samplerate, format, encoding));
 			
 			recordData = new short[bs];
 			
 			//android.os.Process.setThreadPriority(android.os.Process.THREAD_PRIORITY_URGENT_AUDIO);
 			ar = new AudioRecord(
 						MediaRecorder.AudioSource.MIC,
-						AfskEncoder.samplerate,
+						samplerate,
 						format,
 						encoding,
 						bs);
