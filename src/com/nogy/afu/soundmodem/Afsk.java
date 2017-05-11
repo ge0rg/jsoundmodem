@@ -55,7 +55,7 @@ public class Afsk implements AudioRecord.OnRecordPositionUpdateListener
 		run = true;
 		uiHandler = new Handler();
 		debug = null;
-		volume = AudioTrack.getMaxVolume()/2;	
+		volume = AudioTrack.getMaxVolume();
 		max = 0;
 		
 		updateTextView = new Runnable() {
