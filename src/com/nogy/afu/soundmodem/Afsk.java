@@ -29,7 +29,7 @@ public class Afsk implements AudioRecord.OnRecordPositionUpdateListener
 	public short[] recordData;
 	
 	private int streamType;
-	private int samplerate;
+	private int samplerate, samplerate_out;
 	private AudioTrack a;
 	private boolean isPlaying;
 	private	AudioRecord ar;
@@ -135,14 +135,16 @@ public class Afsk implements AudioRecord.OnRecordPositionUpdateListener
 			return;
 		}
 
-		sendPCM(AfskEncoder.encodeMessagePCM(m, samplerate));
+		samplerate_out = AudioTrack.getNativeOutputSampleRate(streamType);
+		android.util.Log.d("Afsk", "Output sample rate is " + samplerate_out + " Hz");
+		sendPCM(AfskEncoder.encodeMessagePCM(m, samplerate_out));
 	}
 	
 	public void sendPCM(short[] pcmData)
 	{
 		a = new AudioTrack(
 				streamType,
-				samplerate,
+				samplerate_out,
 				AudioFormat.CHANNEL_CONFIGURATION_MONO,
 				AudioFormat.ENCODING_PCM_16BIT,
 				pcmData.length*2,
