@@ -132,17 +132,18 @@ public class Afsk implements AudioRecord.OnRecordPositionUpdateListener
 		this.playbackListener = listener;
 	}
 
-	public void sendMessage(Message m)
+	public boolean sendMessage(Message m)
 	{
 		// stop playback if not finished with last one
 		if (isPlaying) {
 			android.util.Log.e("Afsk", "Skipping packet; last one is still playing.");
-			return;
+			return false;
 		}
 
 		samplerate_out = AudioTrack.getNativeOutputSampleRate(streamType);
 		android.util.Log.d("Afsk", "Output sample rate is " + samplerate_out + " Hz");
 		sendPCM(AfskEncoder.encodeMessagePCM(m, samplerate_out));
+		return true;
 	}
 	
 	public void sendPCM(short[] pcmData)
