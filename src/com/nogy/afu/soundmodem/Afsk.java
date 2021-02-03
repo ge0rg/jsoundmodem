@@ -39,6 +39,7 @@ public class Afsk implements AudioRecord.OnRecordPositionUpdateListener
 	
 	private Thread postProcessor;
 	private Runnable postProcess;
+	private AudioTrack.OnPlaybackPositionUpdateListener playbackListener;
 	
 	private int pos;
 	private boolean run;
@@ -127,6 +128,10 @@ public class Afsk implements AudioRecord.OnRecordPositionUpdateListener
 		this.volume = vol;
 	}
 	
+	public void setPlaybackPositionUpdateListener(AudioTrack.OnPlaybackPositionUpdateListener listener) {
+		this.playbackListener = listener;
+	}
+
 	public void sendMessage(Message m)
 	{
 		// stop playback if not finished with last one
@@ -159,9 +164,12 @@ public class Afsk implements AudioRecord.OnRecordPositionUpdateListener
 			public void onMarkerReached(AudioTrack track) {
 				track.release();
 				isPlaying = false;
+				if (Afsk.this.playbackListener != null)
+					Afsk.this.playbackListener.onMarkerReached(track);
 			}
 			public void onPeriodicNotification(AudioTrack track) {
-				// no-op
+				if (Afsk.this.playbackListener != null)
+					Afsk.this.playbackListener.onPeriodicNotification(track);
 			}
 		}, uiHandler);
 		a.play();
