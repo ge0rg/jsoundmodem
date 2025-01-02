@@ -152,9 +152,16 @@ public class APRSFrame {
 		i += 7;
 		for (k=0; k<digis.length; k++)	// Parse an fill in Digis
 		{
-			temp = parseCall(digis[k],false);
-			System.arraycopy(temp, 0, out, i, 7);
-			i += 7;
+			for (k = 0; k < digis.length; k++) {
+				String digi = digis[k];
+				
+				// Set isDest to true if the address ends with "*", and strip the "*" if it exists
+				boolean isDest = digi.endsWith("*");
+				if (isDest) digi = digi.substring(0, digi.length() - 1);
+				temp = parseCall(digi, isDest);
+				System.arraycopy(temp, 0, out, i, 7);
+				i += 7;
+			}
 		}
 		out[i-1] |= 0x01;
 		out[i++] = this.cf;
