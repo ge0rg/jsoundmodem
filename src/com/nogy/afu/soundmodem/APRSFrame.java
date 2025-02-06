@@ -139,22 +139,37 @@ public class APRSFrame {
 	
 	public byte[] toAX25()
 	{
-		String[] digis = this.digia.split(",");
+		String[] digis = this.digia.isEmpty() ? new String[0] : this.digia.split(",");
 		byte[] databytes = data.getBytes();
-		byte[] out = new byte[14+digis.length*7+2+databytes.length+2];
+		byte[] out;
+		if (this.digia.isEmpty()) {
+			out = new byte[14 + 2 + databytes.length + 2];
+		} else {
+			out = new byte[14 + digis.length * 7 + 2 + databytes.length + 2];
+		}
 		byte[] temp;
 		int k,i=0;
 		temp = parseCall(this.desta, true);
 		System.arraycopy(temp, 0, out, i, 7);
 		i += 7;
-		temp = parseCall(this.srca, false);
+		if (!this.digia.isEmpty()) {
+			temp = parseCall(this.srca, false);
+		} else {
+			temp = parseCall(this.srca, true);
+		}
 		System.arraycopy(temp, 0, out, i, 7);
 		i += 7;
-		for (k=0; k<digis.length; k++)	// Parse an fill in Digis
+		if (!this.digia.isEmpty()) 
 		{
-			temp = parseCall(digis[k],false);
-			System.arraycopy(temp, 0, out, i, 7);
-			i += 7;
+			for (k = 0; k < digis.length; k++) {
+				String digi = digis[k];
+				// Set isDest to true if the address ends with "*", and strip the "*" if it exists
+				boolean isDest = digi.endsWith("*");
+				if (isDest) digi = digi.substring(0, digi.length() - 1);
+				temp = parseCall(digi, isDest);
+				System.arraycopy(temp, 0, out, i, 7);
+				i += 7;
+			}
 		}
 		out[i-1] |= 0x01;
 		out[i++] = this.cf;
