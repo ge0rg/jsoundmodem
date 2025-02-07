@@ -8,6 +8,9 @@
 		<pathelement location="/usr/share/java/ant.jar" />
 	</path>
 
+	<property environment="env"/>
+	<property name="ANDROID_HOME" value="${env.ANDROID_HOME}"/>
+
 	<target name="compile-library" >
 		<mkdir dir="bin" />
 		<mkdir dir="bin/classes" />
@@ -15,7 +18,7 @@
 		<javac  destdir="bin/classes"
 			deprecation="false"
 			optimize="true"
-			classpath="/usr/src/G1/android-sdk/platforms/android-3/android.jar"
+			classpath="${ANDROID_HOME}/platforms/android-15/android.jar"
 			debug="true" >
 
 			<src path="src/" />
